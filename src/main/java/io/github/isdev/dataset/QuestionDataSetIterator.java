@@ -73,7 +73,11 @@ public class QuestionDataSetIterator implements DataSetIterator {
     }
     @Override
     public DataSet next(int i) {
-        return null;
+        String text = questionIter.next();
+        INDArray features = converter.transform(text);
+
+        INDArray labels = features.getRow(0).putScalar(0,1.0);
+        return new DataSet(features,labels);
     }
 
     @Override
