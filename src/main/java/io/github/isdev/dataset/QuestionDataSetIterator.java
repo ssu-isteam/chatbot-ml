@@ -48,6 +48,14 @@ public class QuestionDataSetIterator implements DataSetIterator {
         this.answers = new HashMap<>();
     }
 
+    /***
+     *
+     * @param input 읽어들일 CSV 파일
+     * @param labelIndex CSV 파일을 읽어서 , 로 split 했을 때 label의 position
+     * @param questionIndex CSV 파일 형식에서 , 로 split 했을 때 question의 position
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private QuestionDataSetIterator(File input,int labelIndex, int questionIndex) throws IOException, InterruptedException {
         this(input, null, 0);
         //CSV 파일 맨 윗줄에 있는 레이블을 제거합니다.
@@ -71,6 +79,20 @@ public class QuestionDataSetIterator implements DataSetIterator {
 
         this.labels = IntStream.range(0,nOut).boxed().map( i -> Integer.toString(i)).collect(Collectors.toList());;
     }
+
+    /***
+     *
+     * @param input 읽어들일 CSV 파일
+     * @param labelIndex CSV 파일을 읽어서 , 로 split 했을 때 label의 position
+     * @param questionIndex CSV 파일 형식에서 , 로 split 했을 때 question의 position
+     * @return 새로운 QuestionDataSetIterator 인스턴스
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static QuestionDataSetIterator newIterator(File input, int labelIndex, int questionIndex) throws IOException, InterruptedException {
+        return new QuestionDataSetIterator(input,labelIndex,questionIndex);
+    }
+
     @Override
     public DataSet next(int i) {
         String text = questionIter.next();
@@ -80,11 +102,19 @@ public class QuestionDataSetIterator implements DataSetIterator {
         return new DataSet(features,labels);
     }
 
+    /***
+     *
+     * @return 입력 노드의 개수
+     */
     @Override
     public int inputColumns() {
         return nIn;
     }
 
+    /***
+     *
+     * @return 출력 노드의 개수
+     */
     @Override
     public int totalOutcomes() {
         return nOut;
@@ -102,6 +132,7 @@ public class QuestionDataSetIterator implements DataSetIterator {
 
     @Override
     public void reset() {
+        pos = 0;
         questionIter = answers.values().iterator();
     }
 
@@ -120,6 +151,10 @@ public class QuestionDataSetIterator implements DataSetIterator {
         this.preProcessor = dataSetPreProcessor;
     }
 
+    /***
+     *
+     * @return 레이블
+     */
     @Override
     public List<String> getLabels() {
         return labels;
@@ -140,7 +175,7 @@ public class QuestionDataSetIterator implements DataSetIterator {
     /**
      * Returns the next element in the iteration.
      *
-     * @return the next element in the iteration
+     * @return the next dataset in the iteration
      * @throws NoSuchElementException if the iteration has no more elements
      */
     @Override
