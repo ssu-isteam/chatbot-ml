@@ -19,22 +19,20 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation("net.sf.opencsv:opencsv:2.0")
-    implementation("org.slf4j:slf4j-api:$sl4jVersion")
-    implementation("org.slf4j:slf4j-log4j12:$sl4jVersion")
+    implementation("net.sf.opencsv:opencsv:2.3")
     implementation("org.nd4j:nd4j-native-platform:1.0.0-beta7")
     implementation("org.deeplearning4j:deeplearning4j-core:$dl4jVersion")
     implementation("org.deeplearning4j:deeplearning4j-nlp:$dl4jVersion")
 
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("ch.qos.logback:logback-classic:1.2.5")
+    implementation("ch.qos.logback:logback-classic:1.2.6")
 }
 
 group = "dev.isteam"
 version = "1.0-SNAPSHOT"
 description = rootProject.name
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 publishing {
     publications.create<MavenPublication>("maven") {
