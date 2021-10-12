@@ -1,4 +1,4 @@
-package io.github.isdev.iterator;
+package dev.isteam.chatbot.dl.iterator;
 
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentencePreProcessor;

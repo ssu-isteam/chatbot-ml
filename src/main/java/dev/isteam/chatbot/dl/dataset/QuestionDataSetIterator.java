@@ -1,7 +1,7 @@
-package io.github.isdev.dataset;
+package dev.isteam.chatbot.dl.dataset;
 
 import au.com.bytecode.opencsv.CSVReader;
-import io.github.isdev.iterator.CSVSentenceIterator;
+import dev.isteam.chatbot.dl.iterator.CSVSentenceIterator;
 import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer;
 import org.deeplearning4j.text.documentiterator.LabelsSource;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
