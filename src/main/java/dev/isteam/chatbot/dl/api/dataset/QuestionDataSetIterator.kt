@@ -1,7 +1,7 @@
-package dev.isteam.chatbot.dl.dataset
+package dev.isteam.chatbot.dl.api.dataset
 
 import au.com.bytecode.opencsv.CSVReader
-import dev.isteam.chatbot.dl.iterator.CSVSentenceIterator
+import dev.isteam.chatbot.dl.api.dataset.iterator.CSVSentenceIterator
 import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer
 import org.deeplearning4j.text.documentiterator.LabelsSource
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory
@@ -59,9 +59,9 @@ class QuestionDataSetIterator private constructor(input: File, converter: TfidfV
             .setIterator(CSVSentenceIterator(input, questionIndex))
             .setTokenizerFactory(DefaultTokenizerFactory())
             .build()
+
         converter!!.fit()
         //입력 노드의 수를 정합니다.
-        nIn = converter!!.transform(answers[0]).columns()
         labels = IntStream.range(0, nOut).boxed().map { i: Int? ->
             (i!!).toString()
         }.collect(Collectors.toList())

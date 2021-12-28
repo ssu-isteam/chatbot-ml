@@ -1,4 +1,4 @@
-package dev.isteam.chatbot.dl.iterator
+package dev.isteam.chatbot.dl.api.dataset.iterator
 
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator
 import org.deeplearning4j.text.sentenceiterator.SentencePreProcessor
@@ -7,13 +7,14 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
 
-class ICSVSentenceIterator(input: File?) : SentenceIterator {
+class CSVSentenceIterator(input: File?, targetIndex: Int) : SentenceIterator {
     private var sentencePreProcessor: SentencePreProcessor? = null
     private val reader: BufferedReader
     private val lines: MutableList<String>
     private var iter: Iterator<String>
+    private var targetIndex = 0
     override fun nextSentence(): String {
-        return iter.next()
+        return iter.next().split(",").toTypedArray()[targetIndex].trim { it <= ' ' }
     }
 
     override fun hasNext(): Boolean {
@@ -36,8 +37,13 @@ class ICSVSentenceIterator(input: File?) : SentenceIterator {
         this.sentencePreProcessor = sentencePreProcessor
     }
 
+    fun setTargetIndex(targetIndex: Int) {
+        this.targetIndex = targetIndex
+    }
+
     init {
         reader = BufferedReader(InputStreamReader(FileInputStream(input), "euc-kr"))
+        this.targetIndex = targetIndex
         lines = ArrayList()
         reader.readLine() //Remove first line
         var line: String

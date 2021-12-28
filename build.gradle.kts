@@ -12,21 +12,27 @@ plugins {
     kotlin("jvm") version "1.5.31"
 }
 
+
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+        name = "ktor-eap"
+    }
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-
+    implementation( group ="org.json", name= "json", version = "20211205")
     implementation("net.sf.opencsv:opencsv:2.3")
     implementation("org.nd4j:nd4j-native-platform:1.0.0-beta7")
     implementation("org.deeplearning4j:deeplearning4j-core:$dl4jVersion")
     implementation("org.deeplearning4j:deeplearning4j-nlp:$dl4jVersion")
 
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("ch.qos.logback:logback-classic:1.2.6")
+    implementation("io.ktor:ktor-server-core:2.0.0-eap-256")
+    implementation("io.ktor:ktor-server-netty:2.0.0-eap-256")
+    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
 
 group = "dev.isteam"

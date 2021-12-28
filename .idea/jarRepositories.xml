@@ -26,5 +26,10 @@
       <option name="name" value="MavenLocal" />
       <option name="url" value="file:$MAVEN_REPOSITORY$/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="ktor-eap" />
+      <option name="name" value="ktor-eap" />
+      <option name="url" value="https://maven.pkg.jetbrains.space/public/p/ktor/eap" />
+    </remote-repository>
   </component>
 </project>
