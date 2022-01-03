@@ -3,9 +3,8 @@
  */
 
 val ktorVersion: String by project
-val sl4jVersion: String by project
 val dl4jVersion: String by project
-
+val nd4jVersion: String by project
 plugins {
     java
     `maven-publish`
@@ -19,20 +18,23 @@ repositories {
         url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
         name = "ktor-eap"
     }
+    maven {
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation( group ="org.json", name= "json", version = "20211205")
-    implementation("net.sf.opencsv:opencsv:2.3")
-    implementation("org.nd4j:nd4j-native-platform:1.0.0-beta7")
-    implementation("org.deeplearning4j:deeplearning4j-core:$dl4jVersion")
-    implementation("org.deeplearning4j:deeplearning4j-nlp:$dl4jVersion")
+    implementation(group = "com.github.shin285", name = "KOMORAN", version = "3.3.4")
+    implementation(group = "org.json", name = "json", version = "20211205")
+    implementation(group = "org.nd4j", name = "nd4j-cuda-10.0-platform", version = nd4jVersion)
+    implementation(group = "org.deeplearning4j", name = "deeplearning4j-core", version = dl4jVersion)
+    implementation(group = "org.deeplearning4j", name = "deeplearning4j-nlp", version = dl4jVersion)
+    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.6")
+    implementation(group = "io.ktor", name = "ktor-server-core", version = "2.0.0-eap-256")
+    implementation(group = "io.ktor", name = "ktor-server-netty", version = "2.0.0-eap-256")
+    implementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.7.0")
 
-    implementation("ch.qos.logback:logback-classic:1.2.6")
-    implementation("io.ktor:ktor-server-core:2.0.0-eap-256")
-    implementation("io.ktor:ktor-server-netty:2.0.0-eap-256")
-    implementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
 
 group = "dev.isteam"
