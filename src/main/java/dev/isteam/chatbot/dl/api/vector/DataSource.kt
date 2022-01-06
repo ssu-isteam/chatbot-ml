@@ -3,12 +3,14 @@ package dev.isteam.chatbot.dl.api.vector
 import dev.isteam.chatbot.dl.api.dataset.PackedRawDataSet
 import dev.isteam.chatbot.dl.api.dataset.RawDataSet
 import dev.isteam.chatbot.dl.api.tokenizer.KoreanTokenizerFactory
+import dev.isteam.chatbot.utils.ArrayUtils
 import org.deeplearning4j.models.word2vec.Word2Vec
 import org.nd4j.linalg.dataset.DataSet
+import org.nd4j.linalg.dataset.MultiDataSet
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator
 import org.nd4j.linalg.factory.Nd4j
-import java.util.concurrent.atomic.AtomicLong
+import org.nd4j.linalg.util.FeatureUtil
 
 class DataSource(
     private val packedRawDataSet: PackedRawDataSet,
@@ -19,7 +21,7 @@ class DataSource(
     private var iterator: Iterator<RawDataSet> = packedRawDataSet.rawDataSets.iterator(),
     private val labels: MutableList<String> = IntRange(
         0,
-        packedRawDataSet.rawDataSets.size
+        packedRawDataSet.rawDataSets.size - 1
     ).map { it.toString() }.toMutableList()
 ) : DataSetIterator {
     /**
@@ -44,40 +46,68 @@ class DataSource(
      * @return the next data applyTransformToDestination
      */
     override fun next(num: Int): DataSet {
-        return DataSet()
+        return nextDataSet(num)
     }
 
+    private fun mdsToDataSet(mds: MultiDataSet): DataSet {
+        var f = mds.features[0]
+        var fm = mds.featuresMaskArrays[0]
+
+        var l = mds.labels[0]
+        var lm = mds.labelsMaskArrays[0]
+
+        return DataSet(f, l, fm, lm)
+    }
+    /*
+    private fun nextMultiDataSet(num: Int) : MultiDataSet{
+        var datasetList = ArrayList<DataSet>()
+        for(i in 0 until num){
+            if(! hasNext())
+                break
+            var dataSet = nextDataSet()
+            datasetList.add(dataSet)
+        }
+        return MultiDataSet(datasetList.map { dataSet -> dataSet.features}.toTypedArray(),datasetList.map { dataSet -> dataSet.labels }.toTypedArray())
+    }
+     */
     /**
      * Returns the next element in the iteration.
      */
     override fun next(): DataSet {
-        var ret = Nd4j.create(1,inputColumns())
+        return next(batchSize)
+        0
+    }
 
-        var rawDatSet = iterator.next()
 
-        var tokenizer = koreanTokenizerFactory.create(rawDatSet.question)
+    private fun nextDataSet(numExamples: Int): DataSet {
+        var features = Nd4j.create( intArrayOf(numExamples,100,100),'c')
+        var outLabels = Nd4j.create(intArrayOf(numExamples,100,labels.size),'c')
+        for (i in 0 until numExamples) {
+            if (!hasNext())
+                break
+            var rawDatSet = iterator.next()
 
-        var tokens = tokenizer.tokens
+            var tokenizer = koreanTokenizerFactory.create(rawDatSet.question)
 
-        var counts = HashMap<String,AtomicLong>()
+            var tokens = tokenizer.tokens
 
-        tokens.forEach {
-            if(!counts.containsKey(it))
-                counts.put(it, AtomicLong(0))
+            for (j in 0 until tokens.size) {
+                var vector: DoubleArray? = word2Vec.getWordVector(tokens[j]) ?: continue
+                for (k in 0 until vector!!.size)
+                    features.putScalar(intArrayOf(i,j,k),vector[k])
+            }
+            var idx = packedRawDataSet.rawDataSets.indexOf(rawDatSet)
+            var labelVector =
+                FeatureUtil.toOutcomeVector(labels.indexOf(idx.toString()).toLong(), labels.size.toLong()).toIntVector()
 
-            counts[it]!!.incrementAndGet()
-        }
-
-        for(i in 0 until tokens.size){
-            var idx = word2Vec.vocab().indexOf(tokens[i])
-            if(idx >= 0){
-
+            for (j in 0 until 100) {
+                for (k in labelVector.indices)
+                    outLabels.putScalar(intArrayOf(i,j,k),labelVector[k])
             }
         }
 
-
-        return DataSet()
-0    }
+        return DataSet(features, outLabels)
+    }
 
     /**
      * Input columns for the dataset

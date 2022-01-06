@@ -11,24 +11,28 @@ import org.nd4j.linalg.lossfunctions.LossFunctions
 
 object KoreanNeuralNetwork {
 
-    fun buildNeuralNetwork(inputSize:Int, outputSize:Int) : MultiLayerNetwork{
+    fun buildNeuralNetwork(inputSize: Int, outputSize: Int): MultiLayerNetwork {
         var conf = NeuralNetConfiguration.Builder()
             .seed(1337)
             .list()
-            .layer(0, VariationalAutoencoder.Builder()
-                .nIn(inputSize)
-                .nOut(1024)
-                .encoderLayerSizes(1024,512,256,128)
-                .decoderLayerSizes(128,256,512,1024)
-                .lossFunction(Activation.RELU,LossFunctions.LossFunction.MSE)
-                .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
-                .dropOut(0.8)
-                .build())
-            .layer(1, OutputLayer.Builder()
-                .nIn(1024).nOut(outputSize)
-                .activation(Activation.SOFTMAX)
-                .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                .build())
+            .layer(
+                0, VariationalAutoencoder.Builder()
+                    .nIn(inputSize)
+                    .nOut(1024)
+                    .encoderLayerSizes(1024, 512, 256, 128)
+                    .decoderLayerSizes(128, 256, 512, 1024)
+                    .lossFunction(Activation.RELU, LossFunctions.LossFunction.MSE)
+                    .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+                    .dropOut(0.8)
+                    .build()
+            )
+            .layer(
+                1, OutputLayer.Builder()
+                    .nIn(1024).nOut(outputSize)
+                    .activation(Activation.SOFTMAX)
+                    .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                    .build()
+            )
             .backpropType(BackpropType.Standard)
             .build()
         return MultiLayerNetwork(conf)

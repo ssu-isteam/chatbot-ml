@@ -4,6 +4,6 @@ import java.util.concurrent.CompletableFuture
 
 
 interface DataSetLoader {
-    fun load() : CompletableFuture<PackedRawDataSet>
+    fun load(): CompletableFuture<PackedRawDataSet>
 
 }

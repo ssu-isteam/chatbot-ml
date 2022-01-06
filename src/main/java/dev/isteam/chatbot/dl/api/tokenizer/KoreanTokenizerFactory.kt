@@ -8,9 +8,10 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory
 import java.io.InputStream
 import java.nio.charset.Charset
 
-class KoreanTokenizerFactory(private val koreanAnalyzer:Komoran = Komoran(DEFAULT_MODEL.FULL)) : TokenizerFactory{
+class KoreanTokenizerFactory(private val koreanAnalyzer: Komoran = Komoran(DEFAULT_MODEL.FULL)) : TokenizerFactory {
 
     private var tokenPreProcess: TokenPreProcess? = null
+
     /**
      * The tokenizer to createComplex
      * @param toTokenize the string to createComplex the tokenizer with
@@ -19,7 +20,7 @@ class KoreanTokenizerFactory(private val koreanAnalyzer:Komoran = Komoran(DEFAUL
     override fun create(toTokenize: String?): Tokenizer {
         var result = koreanAnalyzer.analyze(toTokenize)
         var tokenizer = KoreanTokenizer(result.tokenList)
-        if(tokenPreProcess != null)
+        if (tokenPreProcess != null)
             tokenizer.setTokenPreProcessor(tokenPreProcessor)
         return tokenizer
     }
@@ -33,7 +34,7 @@ class KoreanTokenizerFactory(private val koreanAnalyzer:Komoran = Komoran(DEFAUL
         var text = toTokenize!!.reader(Charset.forName("UTF-8")).readText()
         var result = koreanAnalyzer.analyze(text)
         var tokenizer = KoreanTokenizer(result.tokenList)
-        if(tokenPreProcess != null)
+        if (tokenPreProcess != null)
             tokenizer.setTokenPreProcessor(tokenPreProcessor)
         return tokenizer
     }

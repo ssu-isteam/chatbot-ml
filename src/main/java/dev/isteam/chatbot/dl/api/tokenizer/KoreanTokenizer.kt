@@ -4,9 +4,11 @@ import kr.co.shineware.nlp.komoran.model.Token
 import org.deeplearning4j.text.tokenization.tokenizer.TokenPreProcess
 import org.deeplearning4j.text.tokenization.tokenizer.Tokenizer
 
-class KoreanTokenizer(private val tokenList:List<Token>, var iterator:Iterator<Token> = tokenList.iterator()) : Tokenizer{
+class KoreanTokenizer(private val tokenList: List<Token>, var iterator: Iterator<Token> = tokenList.iterator()) :
+    Tokenizer {
 
     private var tokenPreProcess: TokenPreProcess? = null
+
     /**
      * An iterator for tracking whether
      * more tokens are left in the iterator not
@@ -14,7 +16,7 @@ class KoreanTokenizer(private val tokenList:List<Token>, var iterator:Iterator<T
      * to iterate over
      */
     override fun hasMoreTokens(): Boolean {
-        return iterator.hasNext();
+        return iterator.hasNext()
     }
 
     /**
@@ -22,7 +24,7 @@ class KoreanTokenizer(private val tokenList:List<Token>, var iterator:Iterator<T
      * @return the number of tokens
      */
     override fun countTokens(): Int {
-        return tokenList.size;
+        return tokenList.size
     }
 
     /**
@@ -30,7 +32,7 @@ class KoreanTokenizer(private val tokenList:List<Token>, var iterator:Iterator<T
      * @return the next token in the string if any
      */
     override fun nextToken(): String {
-        return if(tokenPreProcess != null) tokenPreProcess!!.preProcess(iterator.next().morph) else iterator.next().morph
+        return if (tokenPreProcess != null) tokenPreProcess!!.preProcess(iterator.next().morph) else iterator.next().morph
     }
 
     /**
@@ -38,7 +40,7 @@ class KoreanTokenizer(private val tokenList:List<Token>, var iterator:Iterator<T
      * @return a list of all the tokens
      */
     override fun getTokens(): MutableList<String> {
-        return if(tokenPreProcess != null) tokenList.map { token ->
+        return if (tokenPreProcess != null) tokenList.map { token ->
             tokenPreProcess!!.preProcess(token.morph)
         }.toMutableList() else tokenList.map { token ->
             tokenPreProcess!!.preProcess(token.morph)

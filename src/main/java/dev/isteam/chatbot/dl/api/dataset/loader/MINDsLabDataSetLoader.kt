@@ -4,18 +4,14 @@ import dev.isteam.chatbot.dl.api.dataset.DataSetLoader
 import dev.isteam.chatbot.dl.api.dataset.PackedRawDataSet
 import dev.isteam.chatbot.dl.api.dataset.RawDataSet
 import org.json.JSONObject
-import java.io.*
-import java.nio.ByteBuffer
-import java.nio.channels.SeekableByteChannel
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.io.FileInputStream
+import java.io.IOException
 import java.util.concurrent.CompletableFuture
-import kotlin.text.Typography.paragraph
 
-class MINDsLabDataSetLoader(private val path:String) : DataSetLoader {
+class MINDsLabDataSetLoader(private val path: String) : DataSetLoader {
     override fun load(): CompletableFuture<PackedRawDataSet> {
-        return CompletableFuture.supplyAsync{
-            try{
+        return CompletableFuture.supplyAsync {
+            try {
                 var text = FileInputStream(path).reader(charset = Charsets.UTF_8).readText()
                 var obj = JSONObject(text)
 
@@ -24,36 +20,35 @@ class MINDsLabDataSetLoader(private val path:String) : DataSetLoader {
 
                 var datasets = ArrayList<RawDataSet>()
 
-                for(i in 0 until data.length()){
+                for (i in 0 until data.length()) {
                     var dataElem = data.getJSONObject(i)
                     var paragraphs = dataElem.getJSONArray("paragraphs")
-                    for(j in 0 until paragraphs.length()){
+                    for (j in 0 until paragraphs.length()) {
                         var paragraph = paragraphs.getJSONObject(j)
                         var qas = paragraph.getJSONArray("qas")
 
-                        for(k in 0 until qas.length()){
+                        for (k in 0 until qas.length()) {
                             var qasElem = qas.getJSONObject(k)
 
                             var question = qasElem.getString("question")
 
                             var answers = qasElem.getJSONArray("answers")
-                            for(l in 0 until answers.length()){
+                            for (l in 0 until answers.length()) {
                                 var answerElem = answers.getJSONObject(l)
                                 var answer = answerElem.getString("text")
-                                datasets.add(RawDataSet(question = question,answer = answer))
+                                datasets.add(RawDataSet(question = question, answer = answer))
                             }
                         }
                     }
                 }
 
                 return@supplyAsync PackedRawDataSet(datasets)
-            }catch (ex : IOException){
+            } catch (ex: IOException) {
 
             }
             return@supplyAsync PackedRawDataSet()
         }
     }
-
 
 
 }

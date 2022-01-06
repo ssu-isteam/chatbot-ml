@@ -22,7 +22,9 @@ repositories {
         url = uri("https://jitpack.io")
     }
 }
-
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "16"
+}
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(group = "com.github.shin285", name = "KOMORAN", version = "3.3.4")
