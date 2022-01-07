@@ -5,9 +5,11 @@
 val ktorVersion: String by project
 val dl4jVersion: String by project
 val nd4jVersion: String by project
+
 plugins {
     java
     `maven-publish`
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     kotlin("jvm") version "1.5.31"
 }
 
@@ -15,15 +17,11 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
-        name = "ktor-eap"
-    }
-    maven {
         url = uri("https://jitpack.io")
     }
 }
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "16"
+    kotlinOptions.jvmTarget = "11"
 }
 dependencies {
     implementation(kotlin("stdlib"))
@@ -33,19 +31,34 @@ dependencies {
     implementation(group = "org.deeplearning4j", name = "deeplearning4j-core", version = dl4jVersion)
     implementation(group = "org.deeplearning4j", name = "deeplearning4j-nlp", version = dl4jVersion)
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.6")
-    implementation(group = "io.ktor", name = "ktor-server-core", version = "2.0.0-eap-256")
-    implementation(group = "io.ktor", name = "ktor-server-netty", version = "2.0.0-eap-256")
     implementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.7.0")
 
 }
 
-group = "dev.isteam"
+group = "io.github.ssu-isteam"
 version = "1.0-SNAPSHOT"
 description = rootProject.name
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_11
+
+
+
+nexusPublishing{
+    repositories{
+        sonatype{
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username.set("singlerr")
+            password.set("Dbtjdnd0118*")
+        }
+    }
+}
 
 publishing {
     publications.create<MavenPublication>("maven") {
         from(components["java"])
     }
 }
+
+
+
+
