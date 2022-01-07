@@ -37,4 +37,5 @@ object KoreanNeuralNetwork {
             .build()
         return MultiLayerNetwork(conf)
     }
+
 }

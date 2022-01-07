@@ -2,20 +2,15 @@ package dev.isteam.chatbot.dl.api.vector
 
 import dev.isteam.chatbot.dl.api.dataset.PackedRawDataSet
 import dev.isteam.chatbot.dl.api.dataset.RawDataSet
-import dev.isteam.chatbot.dl.api.tokenizer.KoreanTokenizerFactory
-import dev.isteam.chatbot.utils.ArrayUtils
-import org.deeplearning4j.models.word2vec.Word2Vec
 import org.nd4j.linalg.dataset.DataSet
 import org.nd4j.linalg.dataset.MultiDataSet
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator
 import org.nd4j.linalg.factory.Nd4j
-import org.nd4j.linalg.util.FeatureUtil
 
 class DataSource(
     private val packedRawDataSet: PackedRawDataSet,
-    private val word2Vec: Word2Vec,
-    private val koreanTokenizerFactory: KoreanTokenizerFactory,
+    private val ktfid: KoreanTfidfVectorizer,
     private val batchSize: Int = 100,
     private var preProcessor: DataSetPreProcessor? = null,
     private var iterator: Iterator<RawDataSet> = packedRawDataSet.rawDataSets.iterator(),
@@ -80,33 +75,20 @@ class DataSource(
 
 
     private fun nextDataSet(numExamples: Int): DataSet {
-        var features = Nd4j.create( intArrayOf(numExamples,100,100),'c')
-        var outLabels = Nd4j.create(intArrayOf(numExamples,100,labels.size),'c')
+        var features = Nd4j.create(numExamples, ktfid.vocabCache.numWords())
+        var labelVector = Nd4j.create(numExamples, labels.size)
         for (i in 0 until numExamples) {
             if (!hasNext())
                 break
             var rawDatSet = iterator.next()
-
-            var tokenizer = koreanTokenizerFactory.create(rawDatSet.question)
-
-            var tokens = tokenizer.tokens
-
-            for (j in 0 until tokens.size) {
-                var vector: DoubleArray? = word2Vec.getWordVector(tokens[j]) ?: continue
-                for (k in 0 until vector!!.size)
-                    features.putScalar(intArrayOf(i,j,k),vector[k])
-            }
             var idx = packedRawDataSet.rawDataSets.indexOf(rawDatSet)
-            var labelVector =
-                FeatureUtil.toOutcomeVector(labels.indexOf(idx.toString()).toLong(), labels.size.toLong()).toIntVector()
+            var dataSet = ktfid.vectorize(rawDatSet.question, idx.toString())
 
-            for (j in 0 until 100) {
-                for (k in labelVector.indices)
-                    outLabels.putScalar(intArrayOf(i,j,k),labelVector[k])
-            }
+            features.putRow(i.toLong(), dataSet.features)
+            labelVector.putRow(i.toLong(), dataSet.labels)
         }
 
-        return DataSet(features, outLabels)
+        return DataSet(features, labelVector)
     }
 
     /**
@@ -115,7 +97,7 @@ class DataSource(
      * @return
      */
     override fun inputColumns(): Int {
-        return word2Vec.vocab.numWords()
+        return ktfid.vocabCache.numWords()
     }
 
     /**

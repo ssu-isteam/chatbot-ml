@@ -1,21 +1,23 @@
 package dev.isteam.chatbot.dl.api.dataset.loader
 
+import dev.isteam.chatbot.dl.api.dataset.iterator.RawDataSetIterator
 import dev.isteam.chatbot.dl.api.dataset.preprocessor.KoreanTokenPreprocessor
 import dev.isteam.chatbot.dl.api.tokenizer.KoreanTokenizerFactory
 import dev.isteam.chatbot.dl.api.vector.DataSource
+import dev.isteam.chatbot.dl.api.vector.KoreanTfidfVectorizer
 import dev.isteam.chatbot.dl.engines.KoreanNeuralNetwork
 import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer
-import org.deeplearning4j.datasets.fetchers.MnistDataFetcher
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.util.ModelSerializer
 import org.junit.jupiter.api.Test
+import java.io.File
 
 
 internal class MINDsLabDataSetLoaderTest {
 
     @Test
     fun load() {
-        /**
+        /*
         var path = "C:\\Users\\Singlerr\\Desktop\\ISTEAM\\AI 데이터 셋\\일반상식\\02_squad_질문_답변_제시문_말뭉치\\ko_wiki_v1_squad.json"
         var path2 = "C:\\Users\\Singlerr\\Desktop\\ISTEAM\\AI 데이터 셋\\기계독해\\기계독해분야\\ko_nia_normal_squad_all.json"
         var loader = MINDsLabDataSetLoader(path)
@@ -28,30 +30,16 @@ internal class MINDsLabDataSetLoaderTest {
         var tokenizerFactory = KoreanTokenizerFactory()
         tokenizerFactory.tokenPreProcessor = KoreanTokenPreprocessor()
 
-        var iterator = RawDataSetIterator(packedRawDataSet,RawDataSetIterator.IterativeType.QUESTION)
-        val cache = InMemoryLookupCache()
-        val table: WeightLookupTable<VocabWord> = InMemoryLookupTable.Builder<VocabWord>()
-            .vectorLength(100)
-            .useAdaGrad(false)
-            .cache(cache)
-            .lr(0.025).build()
+        var iterator = RawDataSetIterator(packedRawDataSet = packedRawDataSet, iterativeType = RawDataSetIterator.IterativeType.QUESTION)
 
-        val vec: Word2Vec = Word2Vec.Builder()
-            .minWordFrequency(5)
-            .iterations(1)
-            .epochs(1)
-            .layerSize(100)
-            .batchSize(100000)
-            .seed(42)
-            .windowSize(5)
-            .iterate(iterator)
-            .tokenizerFactory(tokenizerFactory)
-            .lookupTable(table)
-            .vocabCache(cache)
-            .build()
+        val vec = KoreanTfidfVectorizer(koreanTokenizerFactory = tokenizerFactory, rawDataSetIterator = iterator,packedRawDataSet = packedRawDataSet, _minWordFrequency = 5)
+
         vec.fit()
-        WordVectorSerializer.writeWord2VecModel(vec,"word2Vec.w2v")
-        **/
+        vec.buildVocab()
+
+        WordVectorSerializer.writeVocabCache(vec.vocabCache, File("tfidVocab.cache"))
+
+         */
 
         var path = "C:\\Users\\Singlerr\\Desktop\\ISTEAM\\AI 데이터 셋\\일반상식\\02_squad_질문_답변_제시문_말뭉치\\ko_wiki_v1_squad.json"
         var path2 = "C:\\Users\\Singlerr\\Desktop\\ISTEAM\\AI 데이터 셋\\기계독해\\기계독해분야\\ko_nia_normal_squad_all.json"
@@ -62,25 +50,24 @@ internal class MINDsLabDataSetLoaderTest {
 
         packedRawDataSet.rawDataSets.plus(packedRawDataSet2.rawDataSets)
 
-        MnistDataFetcher
-
         var tokenizerFactory = KoreanTokenizerFactory()
         tokenizerFactory.tokenPreProcessor = KoreanTokenPreprocessor()
 
-        var vec = WordVectorSerializer.readWord2VecModel("word2VecModel.w2v")
+        var vocabCache = WordVectorSerializer.readVocabCache(File("tfidVocab.cache"))
+        var koreanTfidfVectorizer = KoreanTfidfVectorizer(koreanTokenizerFactory = tokenizerFactory, packedRawDataSet = packedRawDataSet, cache = vocabCache)
 
 
-        var batchSize = 10
+        var batchSize = 1000
 
-        var dataSource = DataSource(packedRawDataSet = packedRawDataSet, word2Vec = vec, koreanTokenizerFactory = tokenizerFactory, batchSize = batchSize)
+        var dataSource = DataSource(packedRawDataSet = packedRawDataSet, ktfid = koreanTfidfVectorizer, batchSize = batchSize)
 
-        var network = KoreanNeuralNetwork.buildNeuralNetwork(100,packedRawDataSet.rawDataSets.size)
+        var network = KoreanNeuralNetwork.buildNeuralNetwork(vocabCache.numWords(),packedRawDataSet.rawDataSets.size)
         network.init()
 
 
         var k = 0
         println("작업 시작")
-        for(i in 0 until 1){
+        for(i in 0 until 50){
             while(dataSource.hasNext()){
                 var dataSet = dataSource.next()
                 network.fit(dataSet)
@@ -92,5 +79,6 @@ internal class MINDsLabDataSetLoaderTest {
             dataSource.reset()
         }
         ModelSerializer.writeModel(network,"network.model",true)
+
     }
 }
